@@ -4,6 +4,9 @@ import com.zhi.claims_analytics.model.Claim;
 import com.zhi.claims_analytics.repository.ClaimRepository;
 import org.springframework.stereotype.Service;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.util.List;
 
 @Service
@@ -19,4 +22,9 @@ public class ClaimsService {
     public List<Claim> getAllClaims(){
         return claimRepository.findAll();
     }
+
+    //pagination but need clean up meta data
+//    public Page<Claim> getAllClaims(Pageable pageable) {
+//        return claimRepository.findAll(pageable);
+//    }
 }

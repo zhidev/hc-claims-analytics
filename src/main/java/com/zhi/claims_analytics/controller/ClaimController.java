@@ -30,6 +30,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 //lets us upload files
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.web.bind.annotation.RequestParam;
+
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -56,6 +61,13 @@ public class ClaimController {
     public List<Claim> getAllClaims() {
         return claimsService.getAllClaims();
     }
+    //pagination but need clean up metadata
+//    public Page<Claim> getAllClaims(
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "20") int size
+//    ) {
+//        return claimsService.getAllClaims(PageRequest.of(page, size));
+//    }
 
     @GetMapping("/analytics/by-state")
     public List<ClaimsByStateDTO> getClaimsByState() {
