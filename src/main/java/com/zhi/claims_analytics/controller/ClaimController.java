@@ -3,6 +3,7 @@ package com.zhi.claims_analytics.controller;
 
 
 
+import com.zhi.claims_analytics.dto.UploadResponseDTO;
 import com.zhi.claims_analytics.model.Claim;
 import com.zhi.claims_analytics.repository.ClaimRepository;
 import com.zhi.claims_analytics.service.ClaimsService;
@@ -63,7 +64,7 @@ public class ClaimController {
     }
 
     @PostMapping("/upload")
-    public String uploadClaimsCsv(@RequestParam("file") MultipartFile file) {
+    public UploadResponseDTO uploadClaimsCsv(@RequestParam("file") MultipartFile file) {
         //return "File received: " + file.getOriginalFilename();
         return claimsUploadService.uploadClaims(file);
     }

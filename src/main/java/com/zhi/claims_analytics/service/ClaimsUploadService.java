@@ -1,13 +1,15 @@
 package com.zhi.claims_analytics.service;
 
+import com.zhi.claims_analytics.dto.UploadResponseDTO;
 import com.zhi.claims_analytics.model.Claim;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 import com.zhi.claims_analytics.repository.ClaimRepository;
 
@@ -27,7 +29,8 @@ public class ClaimsUploadService {
         this.claimRepository = claimRepository;
     }
 
-    public String uploadClaims(@RequestParam("file") MultipartFile file) {
+    @Transactional
+    public UploadResponseDTO uploadClaims(MultipartFile file) {
         //return "File received: " + file.getOriginalFilename();
         try (
                 Reader reader = new InputStreamReader(file.getInputStream());
@@ -64,10 +67,19 @@ public class ClaimsUploadService {
                 claims.add(claim);
             }
             claimRepository.saveAll(claims);
-            return  "Uploaded " + claims.size() + " claims successfully";
-
+            //return  "Uploaded " + claims.size() + " claims successfully";
+            return new UploadResponseDTO(
+                    true,
+                    claims.size(),
+                    "Claims uploaded successfully"
+            );
         } catch (Exception e) {
-            return "Error parsing CSV:" + e;
+            //if upload fails
+            return new UploadResponseDTO(
+                    false,
+                    0,
+                    "Upload Failed: " + e.getMessage()
+            );
         }
     }
 

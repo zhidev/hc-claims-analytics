@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+@Service
 public class ClaimsService {
 
     //Handles general claim operations
