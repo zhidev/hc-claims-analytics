@@ -13,6 +13,8 @@ import org.springframework.stereotype.Service;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
+import java.math.BigDecimal;
+
 
 import java.io.InputStreamReader;
 import java.io.Reader;
@@ -60,21 +62,30 @@ public class ClaimController {
                         CSVFormat.DEFAULT.builder()
                                 .setHeader()
                                 .setSkipHeaderRecord(true)
+                                .setTrim(true)
                                 .build()
                 )
         ) {
             List<Claim> claims = new ArrayList<>();
+
+            System.out.println(csvParser.getHeaderMap().keySet());
+            validateRequiredHeaders(csvParser);
             for (CSVRecord record : csvParser) {
 
 //                String patientId = record.get("patient_id");
 //                String providerId = record.get("provider_id");
 //                String state = record.get("state");
 
+                //call helper method
+                validateRequiredFields(record);
+
                 Claim claim = new Claim();
 
                 claim.setPatientId(record.get("patient_id"));
                 claim.setProviderId(record.get("provider_id"));
                 claim.setState(record.get("state"));
+                claim.setClaimAmount(new BigDecimal(record.get("claim_amount")));
+                claim.setStatus(record.get("status"));
 
                 claims.add(claim);
             }
@@ -86,4 +97,48 @@ public class ClaimController {
         }
     }
 
+    //Sanity checks if columns of input data are valid
+    private void validateRequiredHeaders(CSVParser csvParser){
+        String[] requiredHeaders = {
+                "patient_id",
+                "provider_id",
+                "claim_amount",
+                "state",
+        };
+
+        List<String> missingHeaders = new ArrayList<>();
+
+        for (String header : requiredHeaders) {
+            if (!csvParser.getHeaderMap().containsKey(header)){
+                missingHeaders.add(header);
+            }
+        }
+
+        if (!missingHeaders.isEmpty()){
+            throw new IllegalArgumentException("Missing required CSV columns: " + missingHeaders);
+        }
+    }
+
+    // Sanity checks if input fields fit properly into our table
+    private void validateRequiredFields(CSVRecord record){
+
+        String[] requiredFields = {
+          "patient_id",
+          "provider_id",
+          "state",
+          "claim_amount"
+        };
+
+        List<String> missingFields = new ArrayList<>();
+
+        for (String field : requiredFields) {
+            if (record.get(field).isBlank()){
+                missingFields.add(field);
+            }
+        }
+
+        if (!missingFields.isEmpty()){
+            throw new IllegalArgumentException("Missing required data entry fields: " + missingFields);
+        }
+    }
 }

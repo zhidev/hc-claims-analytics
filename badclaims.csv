@@ -1,0 +1,2 @@
+patient_id, provider_id,state , claim_amount, status
+test, ,catfish, ,Blooped
