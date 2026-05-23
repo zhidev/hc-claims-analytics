@@ -1,0 +1,9 @@
+POST http://localhost:8080/claims/upload
+Content-Type: multipart/form-data; boundary=boundary
+
+--boundary
+Content-Disposition: form-data; name="file"; filename="claims.csv"
+Content-Type: text/csv
+
+< ./claims.csv
+--boundary--
