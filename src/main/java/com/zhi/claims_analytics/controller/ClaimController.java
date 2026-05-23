@@ -5,10 +5,13 @@ package com.zhi.claims_analytics.controller;
 
 import com.zhi.claims_analytics.model.Claim;
 import com.zhi.claims_analytics.repository.ClaimRepository;
+import com.zhi.claims_analytics.service.ClaimsService;
+import com.zhi.claims_analytics.service.ClaimsUploadService;
 import org.springframework.web.bind.annotation.*;
 
 import com.zhi.claims_analytics.dto.ClaimsByStateDTO;
 import com.zhi.claims_analytics.service.ClaimsAnalyticsService;
+import com.zhi.claims_analytics.service.ClaimsUploadService;
 import org.springframework.stereotype.Service;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -34,19 +37,26 @@ import java.util.List;
 @RequestMapping("/claims")
 public class ClaimController {
 
-    public final ClaimRepository claimRepository;
     public final ClaimsAnalyticsService claimsAnalyticsService;
+    private final ClaimsService claimsService;
+    private final ClaimsUploadService claimsUploadService;
 
-    public ClaimController(ClaimRepository claimRepository,
-                           ClaimsAnalyticsService claimsAnalyticsService){
+    //Injected Instances of services & repo
+    public ClaimController(ClaimsService claimsService,
+                           ClaimsAnalyticsService claimsAnalyticsService,
+                           ClaimsUploadService claimsUploadService
+    ){
         this.claimsAnalyticsService = claimsAnalyticsService;
-        this.claimRepository = claimRepository;
+        this.claimsService = claimsService;
+        this.claimsUploadService = claimsUploadService;
+
     }
 
     @GetMapping
     public List<Claim> getAllClaims() {
-        return claimRepository.findAll();
+        return claimsService.getAllClaims();
     }
+
     @GetMapping("/analytics/by-state")
     public List<ClaimsByStateDTO> getClaimsByState() {
         return claimsAnalyticsService.getClaimsByState();
@@ -55,90 +65,10 @@ public class ClaimController {
     @PostMapping("/upload")
     public String uploadClaimsCsv(@RequestParam("file") MultipartFile file) {
         //return "File received: " + file.getOriginalFilename();
-        try (
-                Reader reader = new InputStreamReader(file.getInputStream());
-                CSVParser csvParser = new CSVParser(
-                        reader,
-                        CSVFormat.DEFAULT.builder()
-                                .setHeader()
-                                .setSkipHeaderRecord(true)
-                                .setTrim(true)
-                                .build()
-                )
-        ) {
-            List<Claim> claims = new ArrayList<>();
-
-            System.out.println(csvParser.getHeaderMap().keySet());
-            validateRequiredHeaders(csvParser);
-            for (CSVRecord record : csvParser) {
-
-//                String patientId = record.get("patient_id");
-//                String providerId = record.get("provider_id");
-//                String state = record.get("state");
-
-                //call helper method
-                validateRequiredFields(record);
-
-                Claim claim = new Claim();
-
-                claim.setPatientId(record.get("patient_id"));
-                claim.setProviderId(record.get("provider_id"));
-                claim.setState(record.get("state"));
-                claim.setClaimAmount(new BigDecimal(record.get("claim_amount")));
-                claim.setStatus(record.get("status"));
-
-                claims.add(claim);
-            }
-            claimRepository.saveAll(claims);
-            return  "Uploaded " + claims.size() + " claims successfully";
-
-        } catch (Exception e) {
-            return "Error parsing CSV:" + e;
-        }
+        return claimsUploadService.uploadClaims(file);
     }
 
-    //Sanity checks if columns of input data are valid
-    private void validateRequiredHeaders(CSVParser csvParser){
-        String[] requiredHeaders = {
-                "patient_id",
-                "provider_id",
-                "claim_amount",
-                "state",
-        };
 
-        List<String> missingHeaders = new ArrayList<>();
 
-        for (String header : requiredHeaders) {
-            if (!csvParser.getHeaderMap().containsKey(header)){
-                missingHeaders.add(header);
-            }
-        }
 
-        if (!missingHeaders.isEmpty()){
-            throw new IllegalArgumentException("Missing required CSV columns: " + missingHeaders);
-        }
-    }
-
-    // Sanity checks if input fields fit properly into our table
-    private void validateRequiredFields(CSVRecord record){
-
-        String[] requiredFields = {
-          "patient_id",
-          "provider_id",
-          "state",
-          "claim_amount"
-        };
-
-        List<String> missingFields = new ArrayList<>();
-
-        for (String field : requiredFields) {
-            if (record.get(field).isBlank()){
-                missingFields.add(field);
-            }
-        }
-
-        if (!missingFields.isEmpty()){
-            throw new IllegalArgumentException("Missing required data entry fields: " + missingFields);
-        }
-    }
 }
