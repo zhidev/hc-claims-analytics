@@ -3,14 +3,13 @@ package com.zhi.claims_analytics.controller;
 
 
 
-import com.zhi.claims_analytics.dto.UploadResponseDTO;
+import com.zhi.claims_analytics.dto.*;
 import com.zhi.claims_analytics.model.Claim;
 import com.zhi.claims_analytics.repository.ClaimRepository;
 import com.zhi.claims_analytics.service.ClaimsService;
 import com.zhi.claims_analytics.service.ClaimsUploadService;
 import org.springframework.web.bind.annotation.*;
 
-import com.zhi.claims_analytics.dto.ClaimsByStateDTO;
 import com.zhi.claims_analytics.service.ClaimsAnalyticsService;
 import com.zhi.claims_analytics.service.ClaimsUploadService;
 import org.springframework.stereotype.Service;
@@ -69,7 +68,20 @@ public class ClaimController {
         return claimsUploadService.uploadClaims(file);
     }
 
+    @GetMapping("/analytics/by-status")
+    public List<ClaimsByStatusDTO> getClaimsByStatus(){
+        return claimsAnalyticsService.getClaimsByStatus();
+    }
 
+    @GetMapping("/analytics/total-by-state")
+    public List<ClaimsTotalByStateDTO> getTotalClaimAmountByState(){
+        return claimsAnalyticsService.getTotalClaimAmountByState();
+    }
+
+    @GetMapping("/analytics/top-providers")
+    public List<TopProviderDTO> findTopProviders(){
+        return claimsAnalyticsService.findTopProviders();
+    }
 
 
 }
