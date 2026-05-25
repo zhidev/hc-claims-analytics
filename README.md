@@ -5,6 +5,7 @@ Enterprise-style healthcare claims analytics backend built with Java 17, Spring 
 Project demonstrates backend API development, CSV data ingestion, layered architecture, 
 native SQL analytics queries, DTO-based responses, and database-backed healthcare claims processing.
 
+
 ## Tech Stack
 
 - Java 17
@@ -26,6 +27,20 @@ service/      Business logic, CSV ingestion, analytics processing
 repository/   JPA database access and native SQL queries
 model/        JPA entities
 dto/          API response DTOs
+
+## Performance Engineering Extension
+
+This project also includes a SQL performance-engineering extension documented in:
+
+[`PROJECT_2_PERFORMANCE.md`](./PROJECT_2_PERFORMANCE.md)
+
+The extension benchmarks PostgreSQL analytics queries using `EXPLAIN ANALYZE`, compares execution plans before and after indexing, and documents when indexes improved query performance versus when PostgreSQL kept the original sequential scan plan.
+
+Key findings:
+- Grouped `COUNT(*)` queries on `state` and `provider_id` improved with index-only scans.
+- The `status` index was not used due to low cardinality.
+- A composite `(state, claim_amount)` index did not improve the full-table `SUM(claim_amount)` aggregation.
+
 
 ## Current Features
 
